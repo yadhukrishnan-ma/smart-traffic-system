@@ -1,0 +1,123 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="car">
+    <static>false</static>
+<link name="chassis">
+      <pose>0 0 0.38 0 0 0</pose>
+      <inertial>
+        <mass>800.0</mass>
+        <inertia>
+          <ixx>50</ixx><iyy>100</iyy><izz>100</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <visual name="body">
+        <geometry><box><size>2.2 1.0 0.4</size></box></geometry>
+        <material><ambient>0.96 0.96 0.86 1</ambient><diffuse>0.96 0.96 0.86 1</diffuse></material>
+      </visual>
+      <visual name="cabin">
+        <pose>-0.1 0 0.32 0 0 0</pose>
+        <geometry><box><size>1.0 0.85 0.32</size></box></geometry>
+        <material><ambient>0.96 0.96 0.86 1</ambient><diffuse>0.96 0.96 0.86 1</diffuse></material>
+      </visual>
+      <!-- relative z = -0.20 → world z = 0.38-0.20=0.18 → bottom = 0.03m above ground -->
+      <collision name="chassis_col">
+        <geometry><box><size>2.2 1.0 0.4</size></box></geometry>
+      </collision>
+    </link>
+
+    <link name="front_left_wheel">
+      <pose>0.65 0.6 0.15 1.5707963 0 0</pose>
+      <inertial>
+        <mass>8.0</mass>
+        <inertia><ixx>0.04</ixx><iyy>0.04</iyy><izz>0.07</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.1</length></cylinder></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.1 0.1 0.1 1</diffuse></material></visual>
+      <visual name="rim"><geometry><cylinder><radius>0.09</radius><length>0.11</length></cylinder></geometry>
+        <material><ambient>0.6 0.6 0.6 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material></visual>
+      <collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.1</length></cylinder></geometry>
+        <surface><friction><ode><mu>0.0</mu><mu2>0.0</mu2></ode></friction>
+        <contact><ode><kp>10000000.0</kp><kd>1.0</kd><min_depth>0.002</min_depth></ode></contact></surface></collision>
+    </link>
+    <link name="front_right_wheel">
+      <pose>0.65 -0.6 0.15 1.5707963 0 0</pose>
+      <inertial>
+        <mass>8.0</mass>
+        <inertia><ixx>0.04</ixx><iyy>0.04</iyy><izz>0.07</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.1</length></cylinder></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.1 0.1 0.1 1</diffuse></material></visual>
+      <visual name="rim"><geometry><cylinder><radius>0.09</radius><length>0.11</length></cylinder></geometry>
+        <material><ambient>0.6 0.6 0.6 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material></visual>
+      <collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.1</length></cylinder></geometry>
+        <surface><friction><ode><mu>0.0</mu><mu2>0.0</mu2></ode></friction>
+        <contact><ode><kp>10000000.0</kp><kd>1.0</kd><min_depth>0.002</min_depth></ode></contact></surface></collision>
+    </link>
+    <link name="rear_left_wheel">
+      <pose>-0.65 0.6 0.15 1.5707963 0 0</pose>
+      <inertial>
+        <mass>8.0</mass>
+        <inertia><ixx>0.04</ixx><iyy>0.04</iyy><izz>0.07</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.1</length></cylinder></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.1 0.1 0.1 1</diffuse></material></visual>
+      <visual name="rim"><geometry><cylinder><radius>0.09</radius><length>0.11</length></cylinder></geometry>
+        <material><ambient>0.6 0.6 0.6 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material></visual>
+      <collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.1</length></cylinder></geometry>
+        <surface><friction><ode><mu>1.5</mu><mu2>1.5</mu2></ode></friction>
+        <contact><ode><kp>10000000.0</kp><kd>1.0</kd><min_depth>0.002</min_depth></ode></contact></surface></collision>
+    </link>
+    <link name="rear_right_wheel">
+      <pose>-0.65 -0.6 0.15 1.5707963 0 0</pose>
+      <inertial>
+        <mass>8.0</mass>
+        <inertia><ixx>0.04</ixx><iyy>0.04</iyy><izz>0.07</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.1</length></cylinder></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.1 0.1 0.1 1</diffuse></material></visual>
+      <visual name="rim"><geometry><cylinder><radius>0.09</radius><length>0.11</length></cylinder></geometry>
+        <material><ambient>0.6 0.6 0.6 1</ambient><diffuse>0.6 0.6 0.6 1</diffuse></material></visual>
+      <collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.1</length></cylinder></geometry>
+        <surface><friction><ode><mu>1.5</mu><mu2>1.5</mu2></ode></friction>
+        <contact><ode><kp>10000000.0</kp><kd>1.0</kd><min_depth>0.002</min_depth></ode></contact></surface></collision>
+    </link>
+
+
+    <joint name="front_left_wheel_joint" type="revolute">
+      <parent>chassis</parent><child>front_left_wheel</child>
+      <axis><xyz>0 0 -1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+    <joint name="front_right_wheel_joint" type="revolute">
+      <parent>chassis</parent><child>front_right_wheel</child>
+      <axis><xyz>0 0 -1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+    <joint name="rear_left_wheel_joint" type="revolute">
+      <parent>chassis</parent><child>rear_left_wheel</child>
+      <axis><xyz>0 0 -1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+    <joint name="rear_right_wheel_joint" type="revolute">
+      <parent>chassis</parent><child>rear_right_wheel</child>
+      <axis><xyz>0 0 -1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <ros></ros>
+      <update_rate>50</update_rate>
+      <left_joint>rear_left_wheel_joint</left_joint>
+      <right_joint>rear_right_wheel_joint</right_joint>
+      <wheel_separation>1.2</wheel_separation>
+      <wheel_diameter>0.3</wheel_diameter>
+      <max_wheel_torque>150</max_wheel_torque>
+      <max_wheel_acceleration>2.0</max_wheel_acceleration>
+      <command_topic>cmd_vel</command_topic>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>false</publish_odom_tf>
+      <publish_wheel_tf>false</publish_wheel_tf>
+      <odometry_topic>odom</odometry_topic>
+      <odometry_source>1</odometry_source>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>chassis</robot_base_frame>
+    </plugin>
+  </model>
+</sdf>

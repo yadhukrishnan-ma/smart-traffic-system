@@ -1,0 +1,118 @@
+[0.015s] Invoking command in '/home/dell/smart_traffic_ws/build/smart_intersection': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/dell/smart_traffic_ws/build/smart_intersection -- -j8 -l8
+[0.056s] -- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.283s] -- Found rclpy: 3.3.19 (/opt/ros/humble/share/rclpy/cmake)
+[0.284s] -- Found gazebo_ros: 3.9.0 (/opt/ros/humble/share/gazebo_ros/cmake)
+[0.364s] -- Found rosidl_generator_c: 3.1.8 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.368s] -- Found rosidl_adapter: 3.1.8 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.383s] -- Found rosidl_generator_cpp: 3.1.8 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.407s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.439s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.518s] -- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.521s] -- Found rmw_fastrtps_cpp: 6.2.9 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+[0.737s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[0.888s] -- Found DART: /usr/include (Required is at least version "6.6") found components: dart 
+[0.949s] -- Found Protobuf: /usr/lib/x86_64-linux-gnu/libprotobuf.so (found version "3.12.4") 
+[0.955s] -- Looking for ignition-math6 -- found version 6.15.1
+[0.965s] -- Searching for dependencies of ignition-math6
+[0.967s] -- Looking for OGRE...
+[0.974s] -- Found Ogre Ghadamon (1.9.0)
+[0.974s] -- Found OGRE: optimized;/usr/lib/x86_64-linux-gnu/libOgreMain.so;debug;/usr/lib/x86_64-linux-gnu/libOgreMain.so
+[0.989s] -- Looking for OGRE_Paging...
+[0.989s] -- Found OGRE_Paging: optimized;/usr/lib/x86_64-linux-gnu/libOgrePaging.so;debug;/usr/lib/x86_64-linux-gnu/libOgrePaging.so
+[0.990s] -- Looking for OGRE_Terrain...
+[0.990s] -- Found OGRE_Terrain: optimized;/usr/lib/x86_64-linux-gnu/libOgreTerrain.so;debug;/usr/lib/x86_64-linux-gnu/libOgreTerrain.so
+[0.990s] -- Looking for OGRE_Property...
+[0.990s] -- Found OGRE_Property: optimized;/usr/lib/x86_64-linux-gnu/libOgreProperty.so;debug;/usr/lib/x86_64-linux-gnu/libOgreProperty.so
+[0.990s] -- Looking for OGRE_RTShaderSystem...
+[0.990s] -- Found OGRE_RTShaderSystem: optimized;/usr/lib/x86_64-linux-gnu/libOgreRTShaderSystem.so;debug;/usr/lib/x86_64-linux-gnu/libOgreRTShaderSystem.so
+[0.990s] -- Looking for OGRE_Volume...
+[0.990s] -- Found OGRE_Volume: optimized;/usr/lib/x86_64-linux-gnu/libOgreVolume.so;debug;/usr/lib/x86_64-linux-gnu/libOgreVolume.so
+[0.990s] -- Looking for OGRE_Overlay...
+[0.990s] -- Found OGRE_Overlay: optimized;/usr/lib/x86_64-linux-gnu/libOgreOverlay.so;debug;/usr/lib/x86_64-linux-gnu/libOgreOverlay.so
+[1.406s] -- Looking for ignition-math6 -- found version 6.15.1
+[1.410s] -- Looking for ignition-transport8 -- found version 8.2.1
+[1.411s] -- Searching for dependencies of ignition-transport8
+[1.444s] -- Found Protobuf: /usr/lib/x86_64-linux-gnu/libprotobuf.so (found suitable version "3.12.4", minimum required is "3") 
+[1.467s] -- Config-file not installed for ZeroMQ -- checking for pkg-config
+[1.474s] -- Checking for module 'libzmq >= 4'
+[1.500s] --   Found libzmq , version 4.3.4
+[1.568s] -- Checking for module 'uuid'
+[1.587s] --   Found uuid, version 2.37.2
+[1.638s] -- Looking for ignition-msgs5 -- found version 5.8.1
+[1.638s] -- Searching for dependencies of ignition-msgs5
+[1.673s] -- Looking for ignition-math6 -- found version 6.15.1
+[1.685s] -- Checking for module 'tinyxml2'
+[1.705s] --   Found tinyxml2, version 9.0.0
+[1.770s] -- Looking for ignition-msgs5 -- found version 5.8.1
+[1.771s] -- Looking for ignition-common3 -- found version 3.14.0
+[1.771s] -- Searching for dependencies of ignition-common3
+[1.771s] -- Looking for dlfcn.h - found
+[1.772s] -- Looking for libdl - found
+[1.789s] -- Searching for <ignition-common3> component [graphics]
+[1.790s] -- Looking for ignition-common3-graphics -- found version 3.14.0
+[1.791s] -- Searching for dependencies of ignition-common3-graphics
+[1.791s] -- Looking for ignition-math6 -- found version 6.15.1
+[1.794s] -- Looking for ignition-fuel_tools4 -- found version 4.4.0
+[1.795s] -- Searching for dependencies of ignition-fuel_tools4
+[1.866s] -- Checking for module 'jsoncpp'
+[1.887s] --   Found jsoncpp, version 1.9.5
+[1.952s] -- Checking for module 'libzip'
+[1.973s] --   Found libzip, version 1.7.3
+[2.017s] -- Looking for ignition-common3 -- found version 3.14.0
+[2.018s] -- Looking for ignition-math6 -- found version 6.15.1
+[2.018s] -- Looking for ignition-msgs5 -- found version 5.8.1
+[2.021s] -- Gazebo version: 11.10
+[2.139s] -- Configuring done
+[2.150s] -- Generating done
+[2.154s] -- Build files have been written to: /home/dell/smart_traffic_ws/build/smart_intersection
+[2.200s] Invoked command in '/home/dell/smart_traffic_ws/build/smart_intersection' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/dell/smart_traffic_ws/build/smart_intersection -- -j8 -l8
+[2.216s] Invoking command in '/home/dell/smart_traffic_ws/build/smart_intersection': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/dell/smart_traffic_ws/build/smart_intersection
+[2.223s] -- Install configuration: ""
+[2.224s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/launch
+[2.224s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/launch/intersection.launch.py
+[2.224s] -- Installing: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/launch/test_cameras.launch.py
+[2.224s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models
+[2.224s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/police
+[2.224s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/police/model.config
+[2.224s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/police/model.sdf
+[2.225s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/car
+[2.225s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/car/model.config
+[2.225s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/car/model.sdf
+[2.226s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/bus
+[2.226s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/bus/model.config
+[2.226s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/bus/model.sdf
+[2.227s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/traffic_light
+[2.227s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/traffic_light/model.config
+[2.228s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/traffic_light/model.sdf
+[2.228s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/fire_engine
+[2.228s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/fire_engine/model.config
+[2.228s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/fire_engine/model.sdf
+[2.228s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/ambulance
+[2.228s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/ambulance/model.config
+[2.228s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/models/ambulance/model.sdf
+[2.229s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/worlds
+[2.229s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/worlds/intersection.world
+[2.229s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/config
+[2.229s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/config/waypoints.yaml
+[2.229s] -- Installing: /home/dell/smart_traffic_ws/install/smart_intersection/lib/smart_intersection/smart_traffic_controller.py
+[2.229s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/lib/smart_intersection/emergency_detector.py
+[2.229s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/lib/smart_intersection/vehicle_spawner.py
+[2.230s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/lib/smart_intersection/vehicle_controller.py
+[2.230s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/lib/smart_intersection/vehicle_counter.py
+[2.230s] -- Installing: /home/dell/smart_traffic_ws/install/smart_intersection/lib/smart_intersection/test_spawner.py
+[2.230s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/ament_index/resource_index/package_run_dependencies/smart_intersection
+[2.230s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/ament_index/resource_index/parent_prefix_path/smart_intersection
+[2.230s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/environment/ament_prefix_path.sh
+[2.231s] -- Installing: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/environment/ament_prefix_path.dsv
+[2.231s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/environment/path.sh
+[2.232s] -- Installing: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/environment/path.dsv
+[2.233s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/local_setup.bash
+[2.233s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/local_setup.sh
+[2.233s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/local_setup.zsh
+[2.233s] -- Installing: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/local_setup.dsv
+[2.234s] -- Installing: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/package.dsv
+[2.234s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/ament_index/resource_index/packages/smart_intersection
+[2.234s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/cmake/smart_intersectionConfig.cmake
+[2.234s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/cmake/smart_intersectionConfig-version.cmake
+[2.234s] -- Up-to-date: /home/dell/smart_traffic_ws/install/smart_intersection/share/smart_intersection/package.xml
+[2.235s] Invoked command in '/home/dell/smart_traffic_ws/build/smart_intersection' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/dell/smart_traffic_ws/build/smart_intersection

@@ -1,0 +1,4 @@
+Invoking command in '/home/dell/smart_traffic_ws/build/smart_intersection': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/dell/smart_traffic_ws/build/smart_intersection -- -j8 -l8
+Invoked command in '/home/dell/smart_traffic_ws/build/smart_intersection' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/dell/smart_traffic_ws/build/smart_intersection -- -j8 -l8
+Invoking command in '/home/dell/smart_traffic_ws/build/smart_intersection': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/dell/smart_traffic_ws/build/smart_intersection
+Invoked command in '/home/dell/smart_traffic_ws/build/smart_intersection' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/dell/smart_traffic_ws/build/smart_intersection

@@ -1,0 +1,876 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="intersection_world">
+
+    <!-- Physics -->
+    <physics type="ode">
+      <max_step_size>0.01</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>100</real_time_update_rate>
+    </physics>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- Gazebo ROS state plugin -->
+    <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
+      <ros>
+        <namespace>/gazebo</namespace>
+      </ros>
+    </plugin>
+
+    <!-- Base Grass Plane -->
+    <model name="grass_plane">
+      <static>true</static>
+      <link name="link">
+        <pose>0 0 -0.05 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>200 200 0.1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>200 200 0.1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.6 0.3 1</ambient>
+            <diffuse>0.3 0.6 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- North-South Road -->
+    <model name="road_ns">
+      <static>true</static>
+      <link name="link">
+        <pose>0 0 0.0 0 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>8 100 0.05</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>8 100 0.05</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- East-West Road -->
+    <model name="road_ew">
+      <static>true</static>
+      <link name="link">
+        <pose>0 0 0.001 0 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>100 8 0.05</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>100 8 0.05</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Lane Markings -->
+    <model name="markings">
+      <static>true</static>
+      <link name="link">
+        <pose>0 0 0.03 0 0 0</pose>
+        <!-- NS Center Lines -->
+        <visual name="ns_center_1">
+          <pose>0 15 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0 1</ambient>
+          </material>
+        </visual>
+        <visual name="ns_center_2">
+          <pose>0 35 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 10 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0 1</ambient>
+          </material>
+        </visual>
+        <visual name="ns_center_3">
+          <pose>0 -15 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0 1</ambient>
+          </material>
+        </visual>
+        <visual name="ns_center_4">
+          <pose>0 -35 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 10 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0 1</ambient>
+          </material>
+        </visual>
+        <!-- EW Center Lines -->
+        <visual name="ew_center_1">
+          <pose>15 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0 1</ambient>
+          </material>
+        </visual>
+        <visual name="ew_center_2">
+          <pose>35 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>10 0.2 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0 1</ambient>
+          </material>
+        </visual>
+        <visual name="ew_center_3">
+          <pose>-15 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0 1</ambient>
+          </material>
+        </visual>
+        <visual name="ew_center_4">
+          <pose>-35 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>10 0.2 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0 1</ambient>
+          </material>
+        </visual>
+        <!-- Stop Lines -->
+        <visual name="stop_n">
+          <pose>2 5 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>4 0.5 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="stop_s">
+          <pose>-2 -5 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>4 0.5 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="stop_e">
+          <pose>5 -2 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 4 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="stop_w">
+          <pose>-5 2 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 4 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <!-- Zebra Crossings -->
+        <visual name="cw_n1">
+          <pose>2 6.5 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 2 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="cw_n2">
+          <pose>0 6.5 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 2 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="cw_n3">
+          <pose>-2 6.5 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 2 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="cw_s1">
+          <pose>2 -6.5 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 2 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="cw_s2">
+          <pose>0 -6.5 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 2 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="cw_s3">
+          <pose>-2 -6.5 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 2 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="cw_e1">
+          <pose>6.5 2 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2 0.5 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="cw_e2">
+          <pose>6.5 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2 0.5 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="cw_e3">
+          <pose>6.5 -2 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2 0.5 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="cw_w1">
+          <pose>-6.5 2 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2 0.5 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="cw_w2">
+          <pose>-6.5 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2 0.5 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+        <visual name="cw_w3">
+          <pose>-6.5 -2 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>2 0.5 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Sidewalks -->
+    <model name="sidewalk_ne">
+      <static>true</static>
+      <link name="link">
+        <pose>24 24 0.1 0 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>40 40 0.15</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>40 40 0.15</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="sidewalk_nw">
+      <static>true</static>
+      <link name="link">
+        <pose>-24 24 0.1 0 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>40 40 0.15</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>40 40 0.15</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="sidewalk_se">
+      <static>true</static>
+      <link name="link">
+        <pose>24 -24 0.1 0 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>40 40 0.15</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>40 40 0.15</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="sidewalk_sw">
+      <static>true</static>
+      <link name="link">
+        <pose>-24 -24 0.1 0 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>40 40 0.15</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>40 40 0.15</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Traffic Lights -->
+    <include>
+      <uri>model://traffic_light</uri>
+      <name>tl_northbound</name>
+      <pose>4.5 5.5 0 0 0 1.570796</pose>
+    </include>
+    <include>
+      <uri>model://traffic_light</uri>
+      <name>tl_southbound</name>
+      <pose>-4.5 -5.5 0 0 0 -1.570796</pose>
+    </include>
+    <include>
+      <uri>model://traffic_light</uri>
+      <name>tl_eastbound</name>
+      <pose>5.5 -4.5 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://traffic_light</uri>
+      <name>tl_westbound</name>
+      <pose>-5.5 4.5 0 0 0 3.141592</pose>
+    </include>
+
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SQUARE OVERHEAD FRAME with AI CAMERAS                            -->
+    <!-- Connects all 4 traffic signal poles via vertical supports         -->
+    <!-- Frame at z=7.0m (6m+ clearance for buses/trucks)                 -->
+    <!-- 4 cameras on frame: 30° downtilt, one per road approach          -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <model name="overhead_frame">
+      <static>true</static>
+
+      <!-- ── Vertical support posts from each traffic light pole to frame ── -->
+      <!-- Post height: from pole top (~3.8m) to frame (7.0m) = 3.2m         -->
+      <!-- Center of post at z = (3.8 + 7.0)/2 = 5.4                         -->
+
+      <!-- NE post — above tl_northbound at (4.5, 5.5) -->
+      <link name="post_ne">
+        <pose>4.5 5.5 5.4 0 0 0</pose>
+        <visual name="v">
+          <geometry><cylinder><radius>0.05</radius><length>3.2</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.35 0.35 0.35 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- SW post — above tl_southbound at (-4.5, -5.5) -->
+      <link name="post_sw">
+        <pose>-4.5 -5.5 5.4 0 0 0</pose>
+        <visual name="v">
+          <geometry><cylinder><radius>0.05</radius><length>3.2</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.35 0.35 0.35 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- SE post — above tl_eastbound at (5.5, -4.5) -->
+      <link name="post_se">
+        <pose>5.5 -4.5 5.4 0 0 0</pose>
+        <visual name="v">
+          <geometry><cylinder><radius>0.05</radius><length>3.2</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.35 0.35 0.35 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- NW post — above tl_westbound at (-5.5, 4.5) -->
+      <link name="post_nw">
+        <pose>-5.5 4.5 5.4 0 0 0</pose>
+        <visual name="v">
+          <geometry><cylinder><radius>0.05</radius><length>3.2</length></cylinder></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.35 0.35 0.35 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- ── Horizontal frame beams at z=7.0 ── -->
+      <!-- North beam: NW (-5.5,4.5) → NE (4.5,5.5) — length≈10.05, angle≈5.7° -->
+      <link name="beam_north">
+        <pose>-0.5 5.0 7.0 0 0 0.0997</pose>
+        <visual name="v">
+          <geometry><box><size>10.1 0.08 0.08</size></box></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.35 0.35 0.35 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- South beam: SW (-4.5,-5.5) → SE (5.5,-4.5) — length≈10.05, angle≈5.7° -->
+      <link name="beam_south">
+        <pose>0.5 -5.0 7.0 0 0 0.0997</pose>
+        <visual name="v">
+          <geometry><box><size>10.1 0.08 0.08</size></box></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.35 0.35 0.35 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- East beam: NE (4.5,5.5) → SE (5.5,-4.5) — length≈10.05, angle≈-84.3° -->
+      <link name="beam_east">
+        <pose>5.0 0.5 7.0 0 0 -1.4711</pose>
+        <visual name="v">
+          <geometry><box><size>10.1 0.08 0.08</size></box></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.35 0.35 0.35 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- West beam: NW (-5.5,4.5) → SW (-4.5,-5.5) — length≈10.05, angle≈-84.3° -->
+      <link name="beam_west">
+        <pose>-5.0 -0.5 7.0 0 0 -1.4711</pose>
+        <visual name="v">
+          <geometry><box><size>10.1 0.08 0.08</size></box></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.35 0.35 0.35 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- ── Camera assemblies on the frame ── -->
+      <!-- Each camera: 30° downtilt (pitch=0.524 rad), faces the approaching road -->
+
+      <!-- NORTH camera — on north beam, faces north (yaw=π/2) to watch north road -->
+      <link name="cam_north_link">
+        <pose>0 5.0 7.0 0 0.524 1.5708</pose>
+        <visual name="body">
+          <pose>-0.06 0 0 0 0 0</pose>
+          <geometry><box><size>0.24 0.16 0.14</size></box></geometry>
+          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+        </visual>
+        <visual name="lens">
+          <pose>0.08 0 0 0 1.5708 0</pose>
+          <geometry><cylinder><radius>0.05</radius><length>0.04</length></cylinder></geometry>
+          <material><ambient>0.02 0.02 0.05 1</ambient><diffuse>0.02 0.02 0.05 1</diffuse></material>
+        </visual>
+        <visual name="bracket">
+          <pose>0 0 0.12 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.20</size></box></geometry>
+          <material><ambient>0.4 0.4 0.4 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material>
+        </visual>
+        <sensor name="cam_north" type="camera">
+          <pose>0.14 0 0 0 0 0</pose>
+          <always_on>1</always_on>
+          <update_rate>10</update_rate>
+          <camera>
+            <horizontal_fov>1.4</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>60</far></clip>
+          </camera>
+          <plugin name="cam_north_plugin" filename="libgazebo_ros_camera.so">
+            <ros><remapping>image_raw:=/cam_north/image_raw</remapping></ros>
+            <camera_name>cam_north</camera_name>
+            <frame_name>cam_north_frame</frame_name>
+          </plugin>
+        </sensor>
+      </link>
+
+      <!-- SOUTH camera — on south beam, faces south (yaw=-π/2) to watch south road -->
+      <link name="cam_south_link">
+        <pose>0 -5.0 7.0 0 0.524 -1.5708</pose>
+        <visual name="body">
+          <pose>-0.06 0 0 0 0 0</pose>
+          <geometry><box><size>0.24 0.16 0.14</size></box></geometry>
+          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+        </visual>
+        <visual name="lens">
+          <pose>0.08 0 0 0 1.5708 0</pose>
+          <geometry><cylinder><radius>0.05</radius><length>0.04</length></cylinder></geometry>
+          <material><ambient>0.02 0.02 0.05 1</ambient><diffuse>0.02 0.02 0.05 1</diffuse></material>
+        </visual>
+        <visual name="bracket">
+          <pose>0 0 0.12 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.20</size></box></geometry>
+          <material><ambient>0.4 0.4 0.4 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material>
+        </visual>
+        <sensor name="cam_south" type="camera">
+          <pose>0.14 0 0 0 0 0</pose>
+          <always_on>1</always_on>
+          <update_rate>10</update_rate>
+          <camera>
+            <horizontal_fov>1.4</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>60</far></clip>
+          </camera>
+          <plugin name="cam_south_plugin" filename="libgazebo_ros_camera.so">
+            <ros><remapping>image_raw:=/cam_south/image_raw</remapping></ros>
+            <camera_name>cam_south</camera_name>
+            <frame_name>cam_south_frame</frame_name>
+          </plugin>
+        </sensor>
+      </link>
+
+      <!-- EAST camera — on east beam, faces east (yaw=0) to watch east road -->
+      <link name="cam_east_link">
+        <pose>5.0 0 7.0 0 0.524 0</pose>
+        <visual name="body">
+          <pose>-0.06 0 0 0 0 0</pose>
+          <geometry><box><size>0.24 0.16 0.14</size></box></geometry>
+          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+        </visual>
+        <visual name="lens">
+          <pose>0.08 0 0 0 1.5708 0</pose>
+          <geometry><cylinder><radius>0.05</radius><length>0.04</length></cylinder></geometry>
+          <material><ambient>0.02 0.02 0.05 1</ambient><diffuse>0.02 0.02 0.05 1</diffuse></material>
+        </visual>
+        <visual name="bracket">
+          <pose>0 0 0.12 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.20</size></box></geometry>
+          <material><ambient>0.4 0.4 0.4 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material>
+        </visual>
+        <sensor name="cam_east" type="camera">
+          <pose>0.14 0 0 0 0 0</pose>
+          <always_on>1</always_on>
+          <update_rate>10</update_rate>
+          <camera>
+            <horizontal_fov>1.4</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>60</far></clip>
+          </camera>
+          <plugin name="cam_east_plugin" filename="libgazebo_ros_camera.so">
+            <ros><remapping>image_raw:=/cam_east/image_raw</remapping></ros>
+            <camera_name>cam_east</camera_name>
+            <frame_name>cam_east_frame</frame_name>
+          </plugin>
+        </sensor>
+      </link>
+
+      <!-- WEST camera — on west beam, faces west (yaw=π) to watch west road -->
+      <link name="cam_west_link">
+        <pose>-5.0 0 7.0 0 0.524 3.14159</pose>
+        <visual name="body">
+          <pose>-0.06 0 0 0 0 0</pose>
+          <geometry><box><size>0.24 0.16 0.14</size></box></geometry>
+          <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+        </visual>
+        <visual name="lens">
+          <pose>0.08 0 0 0 1.5708 0</pose>
+          <geometry><cylinder><radius>0.05</radius><length>0.04</length></cylinder></geometry>
+          <material><ambient>0.02 0.02 0.05 1</ambient><diffuse>0.02 0.02 0.05 1</diffuse></material>
+        </visual>
+        <visual name="bracket">
+          <pose>0 0 0.12 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.20</size></box></geometry>
+          <material><ambient>0.4 0.4 0.4 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material>
+        </visual>
+        <sensor name="cam_west" type="camera">
+          <pose>0.14 0 0 0 0 0</pose>
+          <always_on>1</always_on>
+          <update_rate>10</update_rate>
+          <camera>
+            <horizontal_fov>1.4</horizontal_fov>
+            <image><width>640</width><height>480</height></image>
+            <clip><near>0.1</near><far>60</far></clip>
+          </camera>
+          <plugin name="cam_west_plugin" filename="libgazebo_ros_camera.so">
+            <ros><remapping>image_raw:=/cam_west/image_raw</remapping></ros>
+            <camera_name>cam_west</camera_name>
+            <frame_name>cam_west_frame</frame_name>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- DIRECTION LABELS — N, E, S, W at road ends for debugging          -->
+    <!-- Each letter is ~3m tall, built from box primitives, bright colours -->
+    <!-- N=Blue(+Y), S=Red(-Y), E=Green(+X), W=Yellow(-X)                 -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <model name="direction_markers">
+      <static>true</static>
+
+      <!-- ══ N (NORTH) at +Y end — BLUE ══ -->
+      <link name="label_n">
+        <pose>0 47 0 0 0 0</pose>
+        <!-- Left vertical bar -->
+        <visual name="n_left">
+          <pose>-0.6 0 1.5 0 0 0</pose>
+          <geometry><box><size>0.3 0.3 3.0</size></box></geometry>
+          <material><ambient>0 0.4 1 1</ambient><diffuse>0 0.5 1 1</diffuse><emissive>0 0.2 0.5 1</emissive></material>
+        </visual>
+        <!-- Right vertical bar -->
+        <visual name="n_right">
+          <pose>0.6 0 1.5 0 0 0</pose>
+          <geometry><box><size>0.3 0.3 3.0</size></box></geometry>
+          <material><ambient>0 0.4 1 1</ambient><diffuse>0 0.5 1 1</diffuse><emissive>0 0.2 0.5 1</emissive></material>
+        </visual>
+        <!-- Diagonal (bottom-left to top-right) -->
+        <visual name="n_diag">
+          <pose>0 0 1.5 0 0.38 0</pose>
+          <geometry><box><size>0.25 0.25 3.4</size></box></geometry>
+          <material><ambient>0 0.4 1 1</ambient><diffuse>0 0.5 1 1</diffuse><emissive>0 0.2 0.5 1</emissive></material>
+        </visual>
+        <!-- Base plate for visibility -->
+        <visual name="n_base">
+          <pose>0 0 0.05 0 0 0</pose>
+          <geometry><box><size>2.0 1.0 0.1</size></box></geometry>
+          <material><ambient>0 0.3 0.8 1</ambient><diffuse>0 0.4 0.9 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- ══ S (SOUTH) at -Y end — RED ══ -->
+      <link name="label_s">
+        <pose>0 -47 0 0 0 0</pose>
+        <!-- Top horizontal -->
+        <visual name="s_top">
+          <pose>0 0 2.85 0 0 0</pose>
+          <geometry><box><size>1.2 0.3 0.3</size></box></geometry>
+          <material><ambient>1 0.15 0.1 1</ambient><diffuse>1 0.2 0.1 1</diffuse><emissive>0.5 0.1 0.05 1</emissive></material>
+        </visual>
+        <!-- Upper-left vertical -->
+        <visual name="s_uleft">
+          <pose>-0.45 0 2.35 0 0 0</pose>
+          <geometry><box><size>0.3 0.3 0.7</size></box></geometry>
+          <material><ambient>1 0.15 0.1 1</ambient><diffuse>1 0.2 0.1 1</diffuse><emissive>0.5 0.1 0.05 1</emissive></material>
+        </visual>
+        <!-- Middle horizontal -->
+        <visual name="s_mid">
+          <pose>0 0 1.5 0 0 0</pose>
+          <geometry><box><size>1.2 0.3 0.3</size></box></geometry>
+          <material><ambient>1 0.15 0.1 1</ambient><diffuse>1 0.2 0.1 1</diffuse><emissive>0.5 0.1 0.05 1</emissive></material>
+        </visual>
+        <!-- Lower-right vertical -->
+        <visual name="s_lright">
+          <pose>0.45 0 0.65 0 0 0</pose>
+          <geometry><box><size>0.3 0.3 0.7</size></box></geometry>
+          <material><ambient>1 0.15 0.1 1</ambient><diffuse>1 0.2 0.1 1</diffuse><emissive>0.5 0.1 0.05 1</emissive></material>
+        </visual>
+        <!-- Bottom horizontal -->
+        <visual name="s_bot">
+          <pose>0 0 0.15 0 0 0</pose>
+          <geometry><box><size>1.2 0.3 0.3</size></box></geometry>
+          <material><ambient>1 0.15 0.1 1</ambient><diffuse>1 0.2 0.1 1</diffuse><emissive>0.5 0.1 0.05 1</emissive></material>
+        </visual>
+        <!-- Base plate -->
+        <visual name="s_base">
+          <pose>0 0 0.05 0 0 0</pose>
+          <geometry><box><size>2.0 1.0 0.1</size></box></geometry>
+          <material><ambient>0.8 0.1 0.05 1</ambient><diffuse>0.9 0.15 0.1 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- ══ E (EAST) at +X end — GREEN ══ -->
+      <link name="label_e">
+        <pose>47 0 0 0 0 0</pose>
+        <!-- Left vertical backbone -->
+        <visual name="e_vert">
+          <pose>0 0 1.5 0 0 0</pose>
+          <geometry><box><size>0.3 0.3 3.0</size></box></geometry>
+          <material><ambient>0 0.8 0.15 1</ambient><diffuse>0 0.9 0.2 1</diffuse><emissive>0 0.4 0.1 1</emissive></material>
+        </visual>
+        <!-- Top horizontal -->
+        <visual name="e_top">
+          <pose>0.5 0 2.85 0 0 0</pose>
+          <geometry><box><size>1.0 0.3 0.3</size></box></geometry>
+          <material><ambient>0 0.8 0.15 1</ambient><diffuse>0 0.9 0.2 1</diffuse><emissive>0 0.4 0.1 1</emissive></material>
+        </visual>
+        <!-- Middle horizontal (shorter) -->
+        <visual name="e_mid">
+          <pose>0.35 0 1.5 0 0 0</pose>
+          <geometry><box><size>0.7 0.3 0.3</size></box></geometry>
+          <material><ambient>0 0.8 0.15 1</ambient><diffuse>0 0.9 0.2 1</diffuse><emissive>0 0.4 0.1 1</emissive></material>
+        </visual>
+        <!-- Bottom horizontal -->
+        <visual name="e_bot">
+          <pose>0.5 0 0.15 0 0 0</pose>
+          <geometry><box><size>1.0 0.3 0.3</size></box></geometry>
+          <material><ambient>0 0.8 0.15 1</ambient><diffuse>0 0.9 0.2 1</diffuse><emissive>0 0.4 0.1 1</emissive></material>
+        </visual>
+        <!-- Base plate -->
+        <visual name="e_base">
+          <pose>0.3 0 0.05 0 0 0</pose>
+          <geometry><box><size>2.0 1.0 0.1</size></box></geometry>
+          <material><ambient>0 0.6 0.1 1</ambient><diffuse>0 0.7 0.15 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- ══ W (WEST) at -X end — YELLOW ══ -->
+      <link name="label_w">
+        <pose>-47 0 0 0 0 0</pose>
+        <!-- Left descending bar  ╲ -->
+        <visual name="w_l1">
+          <pose>-0.8 0 1.5 0 -0.18 0</pose>
+          <geometry><box><size>0.3 0.3 3.2</size></box></geometry>
+          <material><ambient>1 0.9 0 1</ambient><diffuse>1 0.95 0.1 1</diffuse><emissive>0.5 0.45 0 1</emissive></material>
+        </visual>
+        <!-- Left ascending bar ╱ -->
+        <visual name="w_l2">
+          <pose>-0.3 0 1.5 0 0.18 0</pose>
+          <geometry><box><size>0.3 0.3 3.2</size></box></geometry>
+          <material><ambient>1 0.9 0 1</ambient><diffuse>1 0.95 0.1 1</diffuse><emissive>0.5 0.45 0 1</emissive></material>
+        </visual>
+        <!-- Right descending bar ╲ -->
+        <visual name="w_r1">
+          <pose>0.3 0 1.5 0 -0.18 0</pose>
+          <geometry><box><size>0.3 0.3 3.2</size></box></geometry>
+          <material><ambient>1 0.9 0 1</ambient><diffuse>1 0.95 0.1 1</diffuse><emissive>0.5 0.45 0 1</emissive></material>
+        </visual>
+        <!-- Right ascending bar ╱ -->
+        <visual name="w_r2">
+          <pose>0.8 0 1.5 0 0.18 0</pose>
+          <geometry><box><size>0.3 0.3 3.2</size></box></geometry>
+          <material><ambient>1 0.9 0 1</ambient><diffuse>1 0.95 0.1 1</diffuse><emissive>0.5 0.45 0 1</emissive></material>
+        </visual>
+        <!-- Base plate -->
+        <visual name="w_base">
+          <pose>0 0 0.05 0 0 0</pose>
+          <geometry><box><size>2.5 1.0 0.1</size></box></geometry>
+          <material><ambient>0.8 0.7 0 1</ambient><diffuse>0.9 0.8 0 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

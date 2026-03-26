@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="traffic_light">
+    <static>true</static>
+    <link name="link">
+      <!-- Pole -->
+      <visual name="pole">
+        <pose>0 0 1.75 0 0 0</pose>
+        <geometry><cylinder><radius>0.06</radius><length>3.5</length></cylinder></geometry>
+        <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+      </visual>
+      <!-- Housing -->
+      <visual name="housing">
+        <pose>0 0 3.2 0 0 0</pose>
+        <geometry><box><size>0.35 0.35 1.2</size></box></geometry>
+        <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+      </visual>
+      <collision name="col_pole">
+        <pose>0 0 1.75 0 0 0</pose>
+        <geometry><cylinder><radius>0.06</radius><length>3.5</length></cylinder></geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

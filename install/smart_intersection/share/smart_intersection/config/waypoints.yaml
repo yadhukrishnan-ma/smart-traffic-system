@@ -1,0 +1,63 @@
+# Smart Intersection — Waypoint Configuration
+# 12 paths: 4 straight, 4 left turn, 4 right turn
+# Junction arc waypoints spaced <= 5 m apart through [-8,+8] zone
+
+paths:
+  # === STRAIGHT PATHS (50% probability) ===
+  A_to_C:
+    type: straight
+    waypoints: [[-2,40], [-2,30], [-2,20], [-2,10], [-2,5], [-2,0], [-2,-5], [-2,-10], [-2,-20], [-2,-30], [-2,-40], [-2,-48]]
+
+  C_to_A:
+    type: straight
+    waypoints: [[2,-40], [2,-30], [2,-20], [2,-10], [2,-5], [2,0], [2,5], [2,10], [2,20], [2,30], [2,40], [2,48]]
+
+  B_to_D:
+    type: straight
+    waypoints: [[40,2], [30,2], [20,2], [10,2], [5,2], [0,2], [-5,2], [-10,2], [-20,2], [-30,2], [-40,2], [-48,2]]
+
+  D_to_B:
+    type: straight
+    waypoints: [[-40,-2], [-30,-2], [-20,-2], [-10,-2], [-5,-2], [0,-2], [5,-2], [10,-2], [20,-2], [30,-2], [40,-2], [48,-2]]
+
+  # === LEFT TURN PATHS (30% probability) ===
+  # A(North) turns left to B(East)
+  A_to_B:
+    type: left_turn
+    waypoints: [[-2,40], [-2,30], [-2,20], [-2,10], [-2,5], [-2,2], [-1.5,0], [-0.5,-1], [0.5,-1.5], [2,-2], [4,-2], [8,-2], [15,-2], [25,-2], [40,-2], [48,-2]]
+
+  # C(South) turns left to D(West)
+  C_to_D:
+    type: left_turn
+    waypoints: [[2,-40], [2,-30], [2,-20], [2,-10], [2,-5], [2,-2], [1.5,0], [0.5,1], [-0.5,1.5], [-2,2], [-4,2], [-8,2], [-15,2], [-25,2], [-40,2], [-48,2]]
+
+  # B(East) turns left to A(North) — exit north
+  B_to_A:
+    type: left_turn
+    waypoints: [[40,2], [30,2], [20,2], [10,2], [5,2], [2,2], [0.5,1], [0,0], [-0.5,1], [-2,2.5], [-2,6], [-2,15], [-2,30], [-2,44]]
+
+  # D(West) turns left to C(South)
+  D_to_C:
+    type: left_turn
+    waypoints: [[-40,-2], [-30,-2], [-20,-2], [-10,-2], [-5,-2], [-2,-2], [0,-1.5], [1,-0.5], [1.5,0.5], [2,2], [2,4], [2,8], [2,15], [2,25], [2,40], [2,48]]
+
+  # === RIGHT TURN PATHS (20% probability) ===
+  # A(North) turns right to D(West)
+  A_to_D:
+    type: right_turn
+    waypoints: [[-2,40], [-2,30], [-2,20], [-2,10], [-2,5], [-2.5,3], [-3,2.5], [-4,2], [-6,2], [-10,2], [-20,2], [-30,2], [-40,2], [-48,2]]
+
+  # C(South) turns right to B(East)
+  C_to_B:
+    type: right_turn
+    waypoints: [[2,-40], [2,-25], [2,-14], [2,-7.5], [2,-4], [2,-2], [1,-0.5], [0,0], [1,0.5], [2.5,-2], [6,-2], [15,-2], [30,-2], [44,-2]]
+
+  # B(East) turns right to C(South)
+  B_to_C:
+    type: right_turn
+    waypoints: [[40,2], [30,2], [20,2], [10,2], [5,2], [3,1.5], [2.5,0], [2,-2], [2,-4], [2,-10], [2,-20], [2,-30], [2,-40], [2,-48]]
+
+  # D(West) turns right to A(North)
+  D_to_A:
+    type: right_turn
+    waypoints: [[-40,-2], [-30,-2], [-20,-2], [-10,-2], [-5,-2], [-3,-1.5], [-2.5,0], [-2,2], [-2,4], [-2,10], [-2,20], [-2,30], [-2,40], [-2,48]]
