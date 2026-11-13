@@ -6,34 +6,29 @@ Professional-grade 4-way smart intersection simulation for ROS 2 Humble + Gazebo
 
 | Feature | Description |
 |---------|-------------|
-| **5 Vehicle Types** | Car (blue), Bus (orange), Ambulance (white+cross), Fire Engine (red), Police (dark blue) |
+| **2 Vehicle Types** | Car (10 random colors) and Ambulance (white with red cross) |
 | **4-Direction Traffic** | Vehicles spawn from North, East, South, and West with straight/turn paths |
 | **Pure Pursuit Control** | Waypoint-based lane following with heading-error correction |
 | **Adaptive Timing** | Green time = `base_time + (waiting_vehicles × density_bonus)`, max 25 s |
 | **Camera-Based Counting** | Overhead cameras on each pole feed OpenCV background-subtraction counter |
-| **Emergency Override** | Dual-detection (topic + camera) triggers instant green; 30 s safety timeout |
-| **Collision Prevention** | Forward-cone check (±70°) with distance-based slowdown/stop |
-| **Auto Cleanup** | Vehicles deleted when they finish their path |
+| **Emergency Override** | Dual-detection (topic + camera) triggers instant green for ambulance lane |
+| **Collision Prevention** | Narrow forward-cone check (18°) with distance-based slowdown/stop |
+| **Self-Healing Nodes** | Orphan vehicle controllers self-terminate automatically when simulation stops |
+| **State Logging** | Built-in logger node writes state records (JSONL) and prints real-time terminal tables |
 
 ## Priority Weights
 
 | Type | Weight | Emergency |
 |------|--------|-----------|
 | Ambulance | 5 | ✅ |
-| Fire Engine | 4 | ✅ |
-| Police | 3 | ✅ |
-| Bus | 1 | ❌ |
 | Car | 0 | ❌ |
 
 ## Spawn Distribution
 
-- 70% Car
-- 15% Bus
-- 5% Ambulance
-- 5% Fire Engine
-- 5% Police
+- **Car:** Spawns 10 different colors sequentially.
+- **Ambulance:** Spawns every **4 cars** (if no emergency is currently active).
 
-Max vehicles: 8. Spawn interval: ~8 seconds. Round-robin across 4 directions.
+Max active vehicles: 20. Spawn interval: 1.5 seconds. Spawns are round-robin across all 4 directions.
 
 ## Topics
 
@@ -45,8 +40,7 @@ Max vehicles: 8. Spawn interval: ~8 seconds. Round-robin across 4 directions.
 | `/vehicle_positions` | String | Controller broadcasts all positions for collision avoidance |
 | `/vehicle_counts` | String | Camera-based count per direction: `DIR:COUNT` |
 | `/vehicle_done` | String | Vehicle signals path completion for cleanup |
-| `/emergency_request` | String | `EMERGENCY:AXIS:name:type:pw:dist` or `CLEAR:AXIS:name` |
-| `/intersection_lock` | String | `LOCKED:vehicle_name` or `UNLOCKED` |
+| `/emergency_request` | String | `EMERGENCY_APPROACH:AXIS:name:type:pw:dist` or `CLEAR:AXIS:name` |
 | `/cam_*/image_raw` | Image | 4 overhead camera feeds (north, east, south, west) |
 
 ## Project Structure
@@ -62,48 +56,60 @@ smart_intersection/
 ├── config/
 │   └── waypoints.yaml
 ├── models/
-│   ├── car/          (blue sedan)
-│   ├── bus/          (orange bus)
-│   ├── ambulance/    (white + red cross)
-│   ├── fire_engine/  (red truck)
-│   ├── police/       (dark blue + lights)
+│   ├── car/             (customizable color sedan)
+│   ├── ambulance/       (white + red cross)
 │   └── traffic_light/
 └── scripts/
     ├── smart_traffic_controller.py   (signal cycling, lamp control, density, emergency)
     ├── vehicle_controller.py         (waypoint following, signal stop, collision avoid)
     ├── vehicle_spawner.py            (4-direction spawn, cleanup)
     ├── vehicle_counter.py            (OpenCV background subtraction on camera feeds)
-    └── emergency_detector.py         (dual topic+camera emergency detection)
+    ├── emergency_detector.py         (dual topic+camera emergency detection)
+    └── simulation_logger.py          (real-time state logger and terminal visualizer)
 ```
 
 ## Build & Run
 
 ```bash
 cd ~/smart_traffic_ws
+chmod +x src/smart_intersection/scripts/*.py
 colcon build --packages-select smart_intersection
 source install/setup.bash
 ros2 launch smart_intersection intersection.launch.py
 ```
 
-## Simulation Flow
+## Simulation & Priority Flow
 
-1. Gazebo launches with intersection world (roads, sidewalks, lane markings, traffic lights, cameras)
-2. Smart traffic controller spawns lamp spheres and camera mounts, starts with 20 s ALL_RED
-3. Emergency detector starts listening for registry + camera dual-detection
-4. Vehicle spawner begins spawning every ~8 s, round-robin across 4 directions
-5. Vehicle counter processes overhead camera feeds via background subtraction
-6. Vehicles follow waypoint paths via pure pursuit with heading-error correction
-7. Vehicles stop at red lights, proceed on green (with yellow point-of-no-return at ≤4 m)
-8. Density merges registry counts with camera counts; busier directions get longer green
-9. Emergency vehicle dual-detected → instant green for that direction (30 s max)
-10. Emergency passes center & exits → CLEAR fired → normal cycle resumes after YELLOW
-11. Vehicles finish path → auto-deleted from Gazebo
+1. **Simulation Startup:**
+   - Gazebo launches the intersection world containing lane markings, traffic poles, and overhead camera sensors.
+   - The **smart traffic controller** spawns color lamp spheres, starting the normal light cycling.
+   - The **emergency detector** and **vehicle counter** begin monitoring the environment.
+
+2. **Normal Cycle & Traffic Spawning:**
+   - The **vehicle spawner** spawns cars every 1.5 seconds, choosing colors round-robin.
+   - Cars follow waypoint paths using a **Pure Pursuit controller**.
+   - Signals cycle automatically (Green -> Yellow -> Red). Vehicles stop before the stop line (8.0m) on Red, and accelerate to clear the junction if Yellow occurs when they are close (9.2m).
+   - If cars queue up, **Adaptive Timing** extends green phases dynamically based on queue density.
+
+3. **Ambulance Spawning & Immediate green:**
+   - Every 4th vehicle spawned is an **Ambulance**.
+   - The millisecond the ambulance is spawned, `vehicle_spawner.py` broadcasts `EMERGENCY_APPROACH` to `/emergency_request`.
+   - The traffic controller receives this and instantly switches the ambulance lane to **GREEN** (reserving yellow/red only for the cross-axis).
+
+4. **Yielding & Clearing the Path:**
+   - To prevent blocking the ambulance, all normal vehicles in front of the ambulance accelerate to **3.3 m/s** (1.5x cruise speed) to clear the lane immediately.
+   - The ambulance drives fast at **3.96 m/s** (1.8x speed) and ignores all traffic lights.
+   - Because the collision cone is narrowed to **18°**, the ambulance never false-stops for vehicles traveling in opposite or adjacent lanes.
+
+5. **Clearing the Junction:**
+   - Once the ambulance crosses the center and exits the intersection, a `CLEAR` request is fired.
+   - The traffic controller resets back to the normal cycle, clearing the emergency override.
+   - The ambulance and other vehicles despawn automatically at the end of their paths.
+   - Any background child controller processes automatically terminate if Gazebo stops publishing positions, preventing orphan processes.
 
 ## Viva Explanation Points
 
-- **Pure Pursuit**: Each vehicle computes `heading_error = atan2(dy,dx) - yaw` and applies angular velocity `ω = k × error` with exponential smoothing
-- **Forward-Cone Following**: Only vehicles within ±70° forward cone affect speed — prevents rear vehicles from blocking front of queue
-- **Adaptive Timing**: Green phase duration dynamically extends when more vehicles are waiting (`base + count × bonus`), capped at 25 s
-- **Density Merging**: Controller takes `max(registry_count, camera_count)` per direction for robust density estimation
-- **Emergency Protocol**: Dual detection (topic reports + camera HSV analysis) required; controller forces green; 30 s safety timeout; 5 s cooldown prevents rapid re-triggers
-- **4-Direction Clockwise Cycle**: N → E → S → W with score-based next-direction selection (`density × 10 + wait_time × 0.1`)
+- **Pure Pursuit**: Each vehicle computes its steering angle using heading error relative to waypoints: `ω = k_steer * error`.
+- **Narrowed Collision Cone (18°)**: Ensures collision avoidance only checks vehicles directly ahead in the same lane. This eliminates false-stops from traffic in the opposite direction.
+- **Immediate Emergency Override**: Turns the target lane green at the exact moment of spawn, ensuring the ambulance never has to wait.
+- **Orphan Auto-Termination**: Prevents background Python nodes from hanging across simulation runs.

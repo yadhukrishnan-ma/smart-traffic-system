@@ -24,6 +24,7 @@ install(PROGRAMS
   scripts/vehicle_controller.py
   scripts/vehicle_counter.py
   scripts/test_spawner.py
+  scripts/simulation_logger.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

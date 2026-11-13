@@ -78,6 +78,17 @@ def generate_launch_description():
         )]
     )
 
+    # 6. Simulation logger (after 10 s — needs Gazebo model states ready)
+    logger = TimerAction(
+        period=10.0,
+        actions=[Node(
+            package='smart_intersection',
+            executable='simulation_logger.py',
+            name='simulation_logger',
+            output='screen',
+        )]
+    )
+
     return LaunchDescription([
         set_model_path,
         gazebo,
@@ -85,4 +96,5 @@ def generate_launch_description():
         detector,
         spawner,
         counter,
+        logger,
     ])

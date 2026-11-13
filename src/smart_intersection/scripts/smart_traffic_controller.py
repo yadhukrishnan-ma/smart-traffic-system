@@ -3,12 +3,14 @@
 smart_traffic_controller.py — AI-based adaptive traffic control
 ===============================================================
 Features:
-  1. CV-based traffic analysis integration (density, queue, vehicle types)
-  2. Graduated green timing for paired phases (NS / EW)
+  1. CV-based traffic analysis integration (density, queue, depth, vehicle types)
+  2. Camera depth-aware green timing — deeper queues get longer green
   3. Paired phases (North+South, East+West) for straight-only intersection
   4. Graduated emergency vehicle priority per pair
-  5. Lamp state tracking to prevent async race conditions
-  6. Real-time continuous traffic condition updates
+  5. Junction occupancy tracking — prevents vehicles from entering a crowded box
+  6. Junction-clear check before green — extends ALL_RED if vehicles still crossing
+  7. Lamp state tracking to prevent async race conditions
+  8. Camera-triggered emergency override via depth data
 """
 
 import json
@@ -18,7 +20,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from gazebo_msgs.srv import SpawnEntity, SetEntityState
 
-PRIORITY_WEIGHT = {'ambulance': 5, 'fire_engine': 4, 'police': 3, 'bus': 1, 'car': 0}
+PRIORITY_WEIGHT = {'ambulance': 5, 'car': 0}   # ambulance is the only emergency type
 
 # Graduated green timing by density level
 GREEN_BY_DENSITY = {
@@ -28,16 +30,22 @@ GREEN_BY_DENSITY = {
     'VERY_HIGH': 25.0,
 }
 BASE_GREEN_TIME  = 8.0
+MIN_GREEN_TIME   = 4.0   # for empty directions
 DENSITY_BONUS    = 2.0
+DEPTH_BONUS      = 0.3   # extra seconds per meter of queue depth
 MAX_GREEN_TIME   = 25.0
 YELLOW_TIME      = 3.0
 ALL_RED_TIME     = 2.0
+ALL_RED_MAX_EXT  = 3.0   # max extension for junction-clear check
 STARTUP_RED_TIME = 20.0
 
 DENSITY_MIN_DIST  =  5.0
 DENSITY_MAX_DIST  = 35.0
 DENSITY_MAX_SPEED =  1.0
 DENSITY_THRESHOLD =  1
+
+# Junction box params
+JUNCTION_BOX_RADIUS = 5.0   # vehicles within this dist from center are "in junction"
 
 CLOCKWISE_ORDER = ['N', 'E', 'S', 'W']
 PHASES = ['NS', 'EW']
@@ -75,10 +83,11 @@ class SmartTrafficController(Node):
     def __init__(self):
         super().__init__('smart_traffic_controller')
 
-        self.phase_pub = self.create_publisher(String, '/traffic_phase',     10)
-        self.timer_pub = self.create_publisher(String, '/signal_timers',     10)
-        self.pos_pub   = self.create_publisher(String, '/vehicle_positions', 10)
-        self.lock_pub  = self.create_publisher(String, '/intersection_lock', 10)
+        self.phase_pub = self.create_publisher(String, '/traffic_phase',         10)
+        self.timer_pub = self.create_publisher(String, '/signal_timers',         10)
+        self.pos_pub   = self.create_publisher(String, '/vehicle_positions',     10)
+        self.lock_pub  = self.create_publisher(String, '/intersection_lock',     10)
+        self.junc_pub  = self.create_publisher(String, '/junction_occupancy',    10)
 
         # Allow startup_red_time to be overridden via launch parameter
         self.declare_parameter('startup_red_time', STARTUP_RED_TIME)
@@ -92,6 +101,9 @@ class SmartTrafficController(Node):
         self.cv_density_level = {d: 'LOW' for d in CLOCKWISE_ORDER}
         self.cv_queue_length = {d: 0 for d in CLOCKWISE_ORDER}
         self.cv_emergency = {d: False for d in CLOCKWISE_ORDER}
+        self.cv_avg_depth = {d: 0.0 for d in CLOCKWISE_ORDER}
+        self.cv_max_depth = {d: 0.0 for d in CLOCKWISE_ORDER}
+        self.cv_emergency_depth = {d: 0.0 for d in CLOCKWISE_ORDER}
 
         self.spawn_cli = self.create_client(SpawnEntity,    '/spawn_entity')
         self.state_cli = self.create_client(SetEntityState, '/gazebo/set_entity_state')
@@ -116,6 +128,10 @@ class SmartTrafficController(Node):
         self.lock_time    = None
         self.locked       = False
 
+        # Junction occupancy tracking
+        self.junction_vehicles = set()   # names of vehicles currently in the junction box
+        self.junction_count    = 0
+
         # Emergency override state — graduated approach
         self.emergency_active   = False
         self.emergency_axis     = None   # 'NS','EW'
@@ -123,9 +139,11 @@ class SmartTrafficController(Node):
         self.emergency_cooldown = 0.0    # seconds remaining before another override
         self.emergency_state    = None   # 'APPROACH', 'CLOSE', 'OVERRIDE'
 
-        # Lamp state tracking
+        # Lamp state tracking — desired vs actual
         self._lamp_z = {}
+        self._lamp_target = {}   # what each pole SHOULD show
         for d in POLE_POSITIONS:
+            self._lamp_target[d] = 'red'
             for c in ('red', 'yel', 'grn'):
                 self._lamp_z[f'lamp_{d}_{c}'] = Z_HIDDEN
 
@@ -135,7 +153,9 @@ class SmartTrafficController(Node):
         self.create_timer(0.5, self.tick)
         self.create_timer(0.3, self.publish_positions)
         self.create_timer(0.3, self.publish_lock)
+        self.create_timer(0.3, self.publish_junction_occupancy)
         self.create_timer(1.0, self.update_density)
+        self.create_timer(2.0, self._enforce_lamps)  # periodic lamp fix
 
         self.get_logger().info(
             f'Traffic Controller READY — {self.actual_startup_red}s startup ALL_RED'
@@ -210,11 +230,29 @@ class SmartTrafficController(Node):
         self.state_cli.call_async(req)
 
     def _set_pole(self, d, colour):
-        """Show exactly ONE lamp on pole d."""
+        """Show exactly ONE lamp on pole d. Two-phase: hide all, then show target."""
+        self._lamp_target[d] = colour
         c = LIGHT_COORDS[d]
+        # Phase 1: HIDE all lamps on this pole
         for lamp_colour in ('red', 'yel', 'grn'):
-            target_z = Z_OFFSETS[lamp_colour] if lamp_colour == colour else Z_HIDDEN
-            self._move_lamp_if_changed(f'lamp_{d}_{lamp_colour}', c['x'], c['y'], target_z)
+            if lamp_colour != colour:
+                self._move_lamp_if_changed(f'lamp_{d}_{lamp_colour}', c['x'], c['y'], Z_HIDDEN)
+        # Phase 2: SHOW only the target lamp
+        self._move_lamp_if_changed(f'lamp_{d}_{colour}', c['x'], c['y'], Z_OFFSETS[colour])
+
+    def _enforce_lamps(self):
+        """Periodically force all lamps to match desired state — fixes async race glitches."""
+        if not self.lamps_ready:
+            return
+        for d in POLE_POSITIONS:
+            target = self._lamp_target.get(d, 'red')
+            c = LIGHT_COORDS[d]
+            for lamp_colour in ('red', 'yel', 'grn'):
+                name = f'lamp_{d}_{lamp_colour}'
+                desired_z = Z_OFFSETS[lamp_colour] if lamp_colour == target else Z_HIDDEN
+                # Force update regardless of tracked state
+                self._lamp_z[name] = desired_z + 1.0  # invalidate cache
+                self._move_lamp_if_changed(name, c['x'], c['y'], desired_z)
 
     def _set_all_red_immediate(self):
         """Set all 4 poles to RED at once."""
@@ -280,12 +318,44 @@ class SmartTrafficController(Node):
                 self.cv_density_level[d] = data.get('density', 'LOW')
                 self.cv_queue_length[d] = data.get('queue_length', 0)
                 self.cv_emergency[d] = data.get('emergency_detected', False)
+                self.cv_avg_depth[d] = data.get('avg_depth', 0.0)
+                self.cv_max_depth[d] = data.get('max_depth', 0.0)
+                self.cv_emergency_depth[d] = data.get('emergency_depth', 0.0)
                 count = data.get('vehicle_count', 0)
                 self.camera_density[d] = max(self.camera_density.get(d, 0), count)
+
+                # Camera-triggered emergency override
+                if self.cv_emergency[d] and self.cv_emergency_depth[d] > 0:
+                    self._camera_emergency_check(d, self.cv_emergency_depth[d])
         except (json.JSONDecodeError, Exception):
             pass
 
-    # ── Emergency override — graduated approach ────────────────────────────────
+    def _camera_emergency_check(self, direction, depth):
+        """Trigger emergency response based on camera depth data."""
+        if self.emergency_active or self.emergency_cooldown > 0:
+            return
+        axis = 'NS' if direction in ('N', 'S') else 'EW'
+        # Only trigger for close emergency vehicles detected by camera
+        if depth < 20.0:
+            self.get_logger().warn(
+                f'CAMERA EMERGENCY: emergency vehicle in {direction} at depth {depth:.1f}m'
+            )
+            self.emergency_active   = True
+            self.emergency_axis     = axis
+            self.emergency_vehicle  = f'cam_{direction}'
+            self.emergency_cooldown = 5.0
+            if depth > 15.0:
+                self.emergency_state = 'APPROACH'
+            elif depth > 5.0:
+                self.emergency_state = 'CLOSE'
+            else:
+                self.emergency_state = 'OVERRIDE'
+            self.current_phase  = axis
+            self.current_colour = 'EMERGENCY'
+            self.state_start    = self.get_clock().now()
+            self._apply_green(axis)
+
+    # ── Emergency override ────────────────────────────────────────────────────
     def emergency_cb(self, msg: String):
         parts = msg.data.split(':')
         if len(parts) < 2:
@@ -294,57 +364,44 @@ class SmartTrafficController(Node):
         action = parts[0]
 
         if action in ('EMERGENCY', 'EMERGENCY_APPROACH', 'EMERGENCY_CLOSE') and len(parts) >= 6:
-            axis = parts[1]   # 'NS' or 'EW'
-            name = parts[2]
+            axis  = parts[1]
+            name  = parts[2]
             vtype = parts[3]
-            dist = float(parts[5]) if len(parts) > 5 else 20.0
+            dist  = float(parts[5]) if len(parts) > 5 else 20.0
 
-            if self.emergency_cooldown > 0:
-                self.get_logger().info(f'Emergency cooldown active — ignoring {name}')
+            # Cooldown is PER-VEHICLE: a new ambulance is NEVER blocked
+            # by cooldown left over from the previous ambulance
+            if self.emergency_cooldown > 0 and self.emergency_vehicle == name:
+                self.get_logger().info(f'Emergency cooldown active — ignoring same vehicle {name}')
                 return
 
             em_axis = axis
-
             self.emergency_active   = True
             self.emergency_axis     = em_axis
             self.emergency_vehicle  = name
-            self.emergency_cooldown = 5.0
+            self.emergency_cooldown = 3.0   # short: just covers YELLOW+ALL_RED transition
 
-            # Graduated response based on distance
-            if dist > 15.0:
-                self.emergency_state = 'APPROACH'
-                if self.current_phase == em_axis and self.current_colour == 'GREEN':
-                    self.current_green_duration = min(self.current_green_duration + 5.0, MAX_GREEN_TIME + 5.0)
-                    self.get_logger().warn(f'EMERGENCY APPROACH → extending {em_axis} GREEN for {vtype} ({name}) at {dist:.0f}m')
-                else:
-                    self.current_phase  = em_axis
-                    self.current_colour = 'EMERGENCY'
-                    self.state_start    = self.get_clock().now()
-                    self._apply_green(em_axis)
-                    self.get_logger().warn(f'EMERGENCY APPROACH → {em_axis} GREEN for {vtype} ({name})')
-            elif dist > 5.0:
-                self.emergency_state = 'CLOSE'
-                self.current_phase  = em_axis
-                self.current_colour = 'EMERGENCY'
-                self.state_start    = self.get_clock().now()
-                self._apply_green(em_axis)
-                self.get_logger().warn(f'EMERGENCY CLOSE → {em_axis} GREEN HOLD for {vtype} ({name})')
-            else:
-                self.emergency_state = 'OVERRIDE'
-                self.current_phase  = em_axis
-                self.current_colour = 'EMERGENCY'
-                self.state_start    = self.get_clock().now()
-                self._apply_green(em_axis)
-                self.get_logger().warn(f'EMERGENCY OVERRIDE → {em_axis} FULL GREEN for {vtype} ({name})')
+            # ALL distances: switch to GREEN immediately — don't wait for close range
+            self.emergency_state = 'APPROACH' if dist > 15.0 else ('CLOSE' if dist > 5.0 else 'OVERRIDE')
+            self.current_phase  = em_axis
+            self.current_colour = 'EMERGENCY'
+            self.state_start    = self.get_clock().now()
+            self._apply_green(em_axis)
+            self.get_logger().warn(
+                f'★ EMERGENCY {self.emergency_state} → {em_axis} GREEN '
+                f'for {vtype} ({name}) dist={dist:.0f}m'
+            )
 
         elif action == 'CLEAR' and len(parts) >= 3:
             name = parts[2]
             if self.emergency_active and self.emergency_vehicle == name:
-                self.get_logger().info(f'Emergency CLEAR for {name} — transition normal')
+                self.get_logger().info(f'Emergency CLEAR for {name} — resuming normal cycle')
                 self.emergency_active  = False
                 self.emergency_axis    = None
-                self.emergency_vehicle = None
+                self.emergency_vehicle = name   # keep name for cooldown tracking
                 self.emergency_state   = None
+                self.emergency_cooldown = 3.0   # short cooldown for transition only
+                # Immediately go YELLOW → ALL_RED → normal green
                 self.current_colour = 'YELLOW'
                 self.state_start    = self.get_clock().now()
                 self._apply_yellow(self.current_phase)
@@ -355,10 +412,39 @@ class SmartTrafficController(Node):
         for n in stale:
             self.vehicles.pop(n, None)
             self.vehicle_ts.pop(n, None)
+            self.junction_vehicles.discard(n)
             if self.lock_vehicle == n:
                 self.locked       = False
                 self.lock_vehicle = None
                 self.lock_time    = None
+
+    # ── Junction occupancy ─────────────────────────────────────────────────────
+    def _update_junction_occupancy(self):
+        """Track which vehicles are inside the junction box."""
+        in_box = set()
+        for name, v in self.vehicles.items():
+            if v['dist'] < JUNCTION_BOX_RADIUS:
+                in_box.add(name)
+        self.junction_vehicles = in_box
+        self.junction_count = len(in_box)
+
+    def _junction_clear_for_phase(self, new_phase):
+        """Check if junction is clear of vehicles from the opposing phase."""
+        opposing_dirs = ('E', 'W') if new_phase == 'NS' else ('N', 'S')
+        for name in self.junction_vehicles:
+            v = self.vehicles.get(name)
+            if v and v['dir'] in opposing_dirs:
+                return False
+        return True
+
+    def publish_junction_occupancy(self):
+        """Publish junction occupancy count and the current green phase."""
+        self._update_junction_occupancy()
+        m = String()
+        phase_str = self.current_phase if self.current_phase else 'NONE'
+        colour_str = self.current_colour if self.current_colour else 'RED'
+        m.data = f'{self.junction_count}:{phase_str}:{colour_str}'
+        self.junc_pub.publish(m)
 
     # ── Density counting ───────────────────────────────────────────────────────
     def update_density(self):
@@ -386,8 +472,16 @@ class SmartTrafficController(Node):
         return 'NS' if ns_s >= ew_s else 'EW'
 
     def _green_duration_for(self, phase):
+        """Compute green duration using density, queue length AND camera depth."""
         dirs = ('N', 'S') if phase == 'NS' else ('E', 'W')
         d1, d2 = dirs
+
+        # Check if both directions have zero vehicles → minimum green
+        total_vehicles = (self.density.get(d1, 0) + self.density.get(d2, 0) +
+                         self.camera_density.get(d1, 0) + self.camera_density.get(d2, 0))
+        if total_vehicles == 0:
+            return MIN_GREEN_TIME
+
         levels = {'LOW': 1, 'MEDIUM': 2, 'HIGH': 3, 'VERY_HIGH': 4}
         l1 = levels.get(self.cv_density_level.get(d1, 'LOW'), 1)
         l2 = levels.get(self.cv_density_level.get(d2, 'LOW'), 1)
@@ -400,7 +494,11 @@ class SmartTrafficController(Node):
 
         queue_bonus = min(max(self.cv_queue_length.get(d1, 0), self.cv_queue_length.get(d2, 0)) * 1.0, 5.0)
 
-        return min(max(cv_time, count_time) + queue_bonus, MAX_GREEN_TIME)
+        # Depth bonus — deeper queues get proportionally more time
+        max_depth = max(self.cv_max_depth.get(d1, 0.0), self.cv_max_depth.get(d2, 0.0))
+        depth_bonus = min(max_depth * DEPTH_BONUS, 5.0)
+
+        return min(max(cv_time, count_time) + queue_bonus + depth_bonus, MAX_GREEN_TIME)
 
     # ── Intersection lock ──────────────────────────────────────────────────────
     def _update_lock(self):
@@ -475,8 +573,8 @@ class SmartTrafficController(Node):
         elif self.current_colour == 'EMERGENCY':
             self._publish_phase(f'PHASE:{self.current_phase}:GREEN')
             self._publish_timers(0)
-            if elapsed >= 30.0:
-                self.get_logger().warn('Emergency timeout 30s — force resume')
+            if elapsed >= 60.0:   # extended from 30s — ambulance needs time to clear
+                self.get_logger().warn('Emergency timeout 60s — force resume')
                 self.emergency_active  = False
                 self.emergency_axis    = None
                 self.emergency_vehicle = None
@@ -498,7 +596,14 @@ class SmartTrafficController(Node):
             self._publish_timers(0)
             if elapsed >= ALL_RED_TIME:
                 prev = self.current_phase
-                self.current_phase = self._pick_next_phase(exclude=prev)
+                next_phase = self._pick_next_phase(exclude=prev)
+                # Junction-clear check: don't go green if opposing vehicles still in box
+                if not self._junction_clear_for_phase(next_phase):
+                    if elapsed < ALL_RED_TIME + ALL_RED_MAX_EXT:
+                        return  # wait a bit longer
+                    else:
+                        self.get_logger().warn('Junction-clear timeout — forcing GREEN anyway')
+                self.current_phase = next_phase
                 self._start_green(now)
 
     def _start_green(self, now):
